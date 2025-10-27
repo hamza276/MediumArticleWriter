@@ -186,9 +186,9 @@ class ArticleWorkflow:
         if overall_score < settings.PUBLISH_THRESHOLD:
             logger.info(f"Overall score {overall_score:.2f} below threshold, regenerating")
             # Mark lowest scoring node as failed
-            if state["scores"]:
-                lowest_node = min(state["scores"], key=state["scores"].get)
-                if state["scores"][lowest_node] < settings.MIN_SCORE_THRESHOLD:
+            if state.get("scores"):
+                lowest_node = min(state.get("scores"), key=state.get("scores").get)
+                if state.get("scores").get(lowest_node, 0) < settings.MIN_SCORE_THRESHOLD:
                     state["failed_nodes"].append(lowest_node)
                     return "regenerate"
         

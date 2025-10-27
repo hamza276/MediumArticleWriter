@@ -20,8 +20,8 @@ async def validate_math(state: ArticleState) -> ArticleState:
     
     if not has_math:
         logger.info(f"No math content found in article {state['article_id']}, skipping math validation")
-        state["scores"]["math"] = 10.0  # Perfect score if not applicable
-        state["feedback"]["math"] = {"score": 10.0, "feedback": "No mathematical content to validate"}
+        state.get("scores", {})["math"] = 10.0  # Perfect score if not applicable
+        state.get("feedback", {})["math"] = {"score": 10.0, "feedback": "No mathematical content to validate"}
         return state
     
     logger.info(f"Validating math for article {state['article_id']}")
@@ -34,8 +34,8 @@ async def validate_math(state: ArticleState) -> ArticleState:
         )
         
         score = result.get("score", 0.0)
-        state["scores"]["math"] = score
-        state["feedback"]["math"] = result
+        state.get("scores", {})["math"] = score
+        state.get("feedback", {})["math"] = result
         
         # Log validation
         db_ops.add_validation_log(

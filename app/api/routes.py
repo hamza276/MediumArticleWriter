@@ -168,14 +168,14 @@ async def run_workflow(state: ArticleState):
         # Run workflow
         final_state = await workflow_manager.run(state)
         
-        if final_state["status"] == "completed":
+        if final_state.get("status") == "completed":
             await manager.send_completion(
                 state["session_id"],
-                final_state["article_id"],
-                final_state["overall_score"]
+                final_state.get("article_id"),
+                final_state.get("overall_score")
             )
-        elif final_state["status"] == "error":
-            await manager.send_error(state["session_id"], final_state["error"])
+        elif final_state.get("status") == "error":
+            await manager.send_error(state["session_id"], final_state.get("error"))
         
         # Mark queue as completed
         db_ops.update_queue_status(state["session_id"], "completed")
@@ -185,7 +185,7 @@ async def run_workflow(state: ArticleState):
         if next_session:
             # Trigger next article generation
             pass
-        
+        return final_state
     except Exception as e:
         logger.error(f"Workflow error: {str(e)}")
         await manager.send_error(state["session_id"], str(e))
@@ -290,7 +290,7 @@ async def get_validation_report(article_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/articles")
-async def get_all_articles(limit: int = Query(50, ge=1, le=100)):
+async def get_all_articles(limit: int = 50):
     """Get all articles"""
     try:
         articles = db_ops.get_all_articles(limit)
