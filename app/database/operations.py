@@ -18,7 +18,7 @@ class DatabaseOperations:
             echo=False
         )
         Base.metadata.create_all(self.engine)
-        self.SessionLocal = sessionmaker(bind=self.engine)
+        self.SessionLocal = sessionmaker(bind=self.engine, expire_on_commit=False)
         logger.info(f"Database initialized at {settings.DATABASE_PATH}")
     
     @contextmanager

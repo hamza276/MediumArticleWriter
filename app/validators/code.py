@@ -19,8 +19,8 @@ async def validate_code(state: ArticleState) -> ArticleState:
     
     if not has_code:
         logger.info(f"No code content found in article {state['article_id']}, skipping code validation")
-        state["scores"]["code"] = 10.0  # Perfect score if not applicable
-        state["feedback"]["code"] = {"score": 10.0, "feedback": "No code content to validate"}
+        state.get("scores", {})["code"] = 10.0  # Perfect score if not applicable
+        state.get("feedback", {})["code"] = {"score": 10.0, "feedback": "No code blocks to validate"}
         return state
     
     logger.info(f"Validating code for article {state['article_id']}")
@@ -33,8 +33,8 @@ async def validate_code(state: ArticleState) -> ArticleState:
         )
         
         score = result.get("score", 0.0)
-        state["scores"]["code"] = score
-        state["feedback"]["code"] = result
+        state.get("scores", {})["code"] = score
+        state.get("feedback", {})["code"] = result
         
         # Log validation
         db_ops.add_validation_log(

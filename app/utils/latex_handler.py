@@ -21,15 +21,15 @@ class LaTeXHandler:
         
         # Find display equations ($$...$$)
         display_pattern = r'\$\$(.*?)\$\$'
+        content_without_display = content
         for match in re.finditer(display_pattern, content, re.DOTALL):
             equations.append((match.group(1).strip(), 'display', match.start()))
+            content_without_display = content_without_display.replace(match.group(0), '')
         
         # Find inline equations ($...$) but not already captured
-        inline_pattern = r'(?<!\$)\$(?!\$)(.*?)(?<!\$)\$(?!\$)'
-        for match in re.finditer(inline_pattern, content):
-            # Check if this match is not part of display equation
-            if not any(abs(match.start() - eq[2]) < 5 for eq in equations):
-                equations.append((match.group(1).strip(), 'inline', match.start()))
+        inline_pattern = r'\$([^\$]+?)\$'
+        for match in re.finditer(inline_pattern, content_without_display):
+            equations.append((match.group(1).strip(), 'inline', match.start()))
         
         return equations
     
@@ -44,7 +44,7 @@ class LaTeXHandler:
             fig.patch.set_facecolor('white')
             
             # Render the equation
-            text = f"${latex}$" if not display_mode else f"$\\displaystyle {latex}$"
+            text = f"${latex}$"
             
             plt.text(0.5, 0.5, text,
                     size=18 if display_mode else 14,

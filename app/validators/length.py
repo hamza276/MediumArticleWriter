@@ -17,8 +17,8 @@ async def validate_length(state: ArticleState) -> ArticleState:
         )
         
         score = result.get("score", 0.0)
-        state["scores"]["length"] = score
-        state["feedback"]["length"] = result
+        state.get("scores", {})["length"] = score
+        state.get("feedback", {})["length"] = result
         
         # Store word count in metadata
         state["metadata"]["word_count"] = result.get("word_count", 0)

@@ -1,3 +1,4 @@
+import re
 from typing import Dict, Any
 from app.agents.state import ArticleState
 from app.agents.generator import generator
@@ -5,46 +6,46 @@ from app.database.operations import db_ops
 from app.config import settings
 from app.utils.logger import logger
 
-async def validate_language(state: ArticleState) -> ArticleState:
-    """Validate language and tone consistency"""
-    logger.info(f"Validating language for article {state['article_id']}")
+async def validate_structure(state: ArticleState) -> ArticleState:
+    """Validate article structure"""
+    logger.info(f"Validating structure for article {state['article_id']}")
     
     try:
         result = await generator.validate_content(
-            "language",
+            "structure",
             state["content"],
             state["metadata"]
         )
         
         score = result.get("score", 0.0)
-        state["scores"]["language"] = score
-        state["feedback"]["language"] = result
+        state.get("scores", {})["structure"] = score
+        state.get("feedback", {})["structure"] = result
         
         # Log validation
         db_ops.add_validation_log(
             article_id=state["article_id"],
-            node_name="language",
+            node_name="structure",
             score=score,
             feedback=result,
-            retry_count=state["retry_counts"].get("language", 0),
+            retry_count=state["retry_counts"].get("structure", 0),
             status="passed" if score >= settings.MIN_SCORE_THRESHOLD else "failed"
         )
         
         # Check if retry needed
         if score < settings.MIN_SCORE_THRESHOLD:
-            state["failed_nodes"].append("language")
-            state["retry_counts"]["language"] = state["retry_counts"].get("language", 0) + 1
+            state["failed_nodes"].append("structure")
+            state["retry_counts"]["structure"] = state["retry_counts"].get("structure", 0) + 1
             
-            if state["retry_counts"]["language"] >= settings.MAX_RETRIES:
+            if state["retry_counts"]["structure"] >= settings.MAX_RETRIES:
                 state["status"] = "failed"
-                state["error"] = f"Language validation failed after {settings.MAX_RETRIES} retries"
+                state["error"] = f"Structure validation failed after {settings.MAX_RETRIES} retries"
                 logger.error(state["error"])
         
-        logger.info(f"Language validation score: {score:.2f}")
+        logger.info(f"Structure validation score: {score:.2f}")
         return state
         
     except Exception as e:
-        logger.error(f"Language validation error: {str(e)}")
+        logger.error(f"Structure validation error: {str(e)}")
         state["status"] = "error"
         state["error"] = str(e)
         return state

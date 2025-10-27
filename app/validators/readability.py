@@ -17,12 +17,12 @@ async def validate_readability(state: ArticleState) -> ArticleState:
         )
         
         score = result.get("score", 0.0)
-        state["scores"]["readability"] = score
-        state["feedback"]["readability"] = result
+        state.get("scores", {})["readability"] = score
+        state.get("feedback", {})["readability"] = result
         
         # Store readability metrics in metadata
-        state["metadata"]["flesch_reading_ease"] = result.get("flesch_reading_ease", 0)
-        state["metadata"]["gunning_fog_index"] = result.get("gunning_fog_index", 0)
+        state.get("metadata", {})["flesch_reading_ease"] = result.get("flesch_reading_ease", 0)
+        state.get("metadata", {})["gunning_fog_index"] = result.get("gunning_fog_index", 0)
         
         # Log validation
         db_ops.add_validation_log(
